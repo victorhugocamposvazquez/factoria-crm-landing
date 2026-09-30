@@ -8,6 +8,7 @@ import {
   immersionFrameIndex,
   immersionFrameSrc,
 } from "@/lib/immersionFrames";
+import { damp } from "@/lib/scrollProgress";
 
 type Props = {
   progress: React.MutableRefObject<number>;
@@ -15,14 +16,16 @@ type Props = {
 };
 
 /**
- * Lightweight Apple-style scrub: preloads WebP stills and paints the
- * frame that matches scroll progress onto a single canvas.
+ * Scroll-scrubbed WebP sequence. Progress is damped so wheel steps
+ * never show as hard frame jumps.
  */
 export default function FrameSequence({ progress, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const framesRef = useRef<(HTMLImageElement | null)[]>([]);
   const drawnRef = useRef(-1);
   const readyRef = useRef(false);
+  const smoothP = useRef(0);
+  const lastTs = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,16 +44,25 @@ export default function FrameSequence({ progress, className }: Props) {
         img.src = immersionFrameSrc(i);
       });
 
-    // First frame immediately, then the rest in parallel batches.
     void (async () => {
       await load(1);
       if (cancelled) return;
       readyRef.current = true;
       draw(1);
 
-      const rest: Promise<void>[] = [];
-      for (let i = 2; i <= IMMERSION_FRAME_COUNT; i++) rest.push(load(i));
-      await Promise.all(rest);
+      // Preferential load: mid + end first (visible soon), then fill gaps.
+      const order: number[] = [];
+      for (let i = 2; i <= IMMERSION_FRAME_COUNT; i++) order.push(i);
+      order.sort((a, b) => {
+        const da = Math.min(a - 1, IMMERSION_FRAME_COUNT - a);
+        const db = Math.min(b - 1, IMMERSION_FRAME_COUNT - b);
+        return da - db;
+      });
+      const concurrency = 8;
+      for (let i = 0; i < order.length; i += concurrency) {
+        if (cancelled) return;
+        await Promise.all(order.slice(i, i + concurrency).map(load));
+      }
     })();
 
     return () => {
@@ -61,9 +73,13 @@ export default function FrameSequence({ progress, className }: Props) {
 
   useEffect(() => {
     let raf = 0;
-    const tick = () => {
+    const tick = (ts: number) => {
+      const prev = lastTs.current || ts;
+      lastTs.current = ts;
+      const dt = Math.min(0.05, (ts - prev) / 1000);
       if (readyRef.current) {
-        const idx = immersionFrameIndex(progress.current);
+        smoothP.current = damp(smoothP.current, progress.current, 10, dt);
+        const idx = immersionFrameIndex(smoothP.current);
         if (idx !== drawnRef.current) draw(idx);
       }
       raf = requestAnimationFrame(tick);
@@ -75,7 +91,14 @@ export default function FrameSequence({ progress, className }: Props) {
 
   function draw(index: number) {
     const canvas = canvasRef.current;
-    const img = framesRef.current[index];
+    // Prefer exact frame; fall back to nearest loaded neighbour so scrub never blanks.
+    let img = framesRef.current[index];
+    if (!img) {
+      for (let d = 1; d < IMMERSION_FRAME_COUNT; d++) {
+        img = framesRef.current[index - d] || framesRef.current[index + d];
+        if (img) break;
+      }
+    }
     if (!canvas || !img) return;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
@@ -91,13 +114,12 @@ export default function FrameSequence({ progress, className }: Props) {
     }
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // cover
     const scale = Math.max(w / IMMERSION_FRAME_WIDTH, h / IMMERSION_FRAME_HEIGHT);
     const dw = IMMERSION_FRAME_WIDTH * scale;
     const dh = IMMERSION_FRAME_HEIGHT * scale;
     const dx = (w - dw) / 2;
     const dy = (h - dh) / 2;
-    ctx.fillStyle = "#05061a";
+    ctx.fillStyle = "#0b0d24";
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, dx, dy, dw, dh);
     drawnRef.current = index;

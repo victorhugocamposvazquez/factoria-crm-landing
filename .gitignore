@@ -8,3 +8,4 @@ next-env.d.ts
 # fuente del scrub; en public/immersion van los WebP ligeros
 *.mp4
 kling_*.mp4
+.vercel

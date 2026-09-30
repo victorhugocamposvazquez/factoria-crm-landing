@@ -21,7 +21,8 @@ export default function Immersion() {
     return t * t * (3 - 2 * t);
   };
 
-  const progress = usePinnedProgress(pinRef, 5, (p) => {
+  // More scroll distance so 24fps frames advance gradually instead of jumping.
+  const progress = usePinnedProgress(pinRef, 7, (p) => {
     const el = pinRef.current;
     if (!el) return;
     el.style.setProperty("--bar", p > 0.015 && p < 0.985 ? "7vh" : "0px");
@@ -41,15 +42,25 @@ export default function Immersion() {
 
   return (
     <section id="inmersion" aria-label="Nos inundamos de tu proyecto">
-      <div ref={pinRef} className="letterbox relative h-screen w-full overflow-hidden bg-[#05061a]">
+      <div ref={pinRef} className="letterbox relative h-screen w-full overflow-hidden bg-deep">
         <div className="absolute inset-0">
           <FrameSequence progress={progress} className="h-full w-full" />
-          {/* Soft top/bottom veil so type stays readable over bright frames */}
+
+          {/* Exterior circular matte: dark navy vignette framing the shot */}
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 z-[1]"
             style={{
               background:
-                "linear-gradient(180deg, rgba(5,6,26,.55) 0%, rgba(5,6,26,.12) 28%, rgba(5,6,26,.08) 55%, rgba(5,6,26,.72) 100%)",
+                "radial-gradient(ellipse 58% 62% at 50% 46%, transparent 0%, transparent 42%, rgba(11,13,36,.28) 58%, rgba(11,13,36,.72) 74%, #0b0d24 88%, #05061a 100%)",
+            }}
+          />
+
+          {/* Soft readability veil for type */}
+          <div
+            className="pointer-events-none absolute inset-0 z-[2]"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(11,13,36,.5) 0%, rgba(11,13,36,.08) 26%, rgba(11,13,36,.05) 58%, rgba(11,13,36,.78) 100%)",
             }}
           />
         </div>

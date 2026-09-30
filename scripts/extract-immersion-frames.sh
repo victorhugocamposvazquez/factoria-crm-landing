@@ -13,8 +13,8 @@ fi
 mkdir -p "$OUT"
 rm -f "$OUT"/frame-*.webp
 ffmpeg -y -i "$VIDEO" \
-  -vf "fps=10,scale=960:-2:flags=lanczos" \
-  -c:v libwebp -quality 72 -compression_level 6 \
+  -vf "fps=24,scale=1280:-2:flags=lanczos" \
+  -c:v libwebp -quality 82 -compression_level 5 \
   "$OUT/frame-%03d.webp"
 
 COUNT=$(ls "$OUT"/frame-*.webp | wc -l | tr -d ' ')
