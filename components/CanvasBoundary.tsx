@@ -12,6 +12,7 @@ export default class CanvasBoundary extends Component<{ children: React.ReactNod
     if (process.env.NODE_ENV !== "production") console.error("[3D scene]", err);
   }
   render() {
-    return this.state.failed ? (this.props.fallback ?? null) : this.props.children;
+    if (this.state.failed) return this.props.fallback ?? null;
+    return <div className="h-full w-full">{this.props.children}</div>;
   }
 }

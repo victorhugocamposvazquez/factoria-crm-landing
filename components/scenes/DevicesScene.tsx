@@ -61,15 +61,34 @@ const smooth = (a: number, b: number, x: number) => {
 const remap = (p: number) => 0.5 * smooth(0.16, 0.46, p) + 0.5 * smooth(0.58, 0.88, p);
 
 function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const p = useRef(0);
   const pos = useMemo(() => new THREE.Vector3(), []);
   const look = useMemo(() => new THREE.Vector3(), []);
+  const pull = useMemo(() => new THREE.Vector3(), []);
   useFrame((_, dt) => {
     p.current = damp(p.current, progress.current, 5, dt);
     const t = remap(p.current);
     CAM.getPoint(t, pos);
     LOOK.getPoint(t, look);
+
+    const portrait = size.height / Math.max(1, size.width) > 1.05 || size.width < 720;
+    const cam = camera as THREE.PerspectiveCamera;
+    if (portrait) {
+      // Closer + lower framing: device fills the viewport and sits behind the copy card.
+      pull.copy(pos).sub(look);
+      const dist = pull.length();
+      if (dist > 0.001) {
+        pull.multiplyScalar(1 / dist);
+        pos.addScaledVector(pull, -dist * 0.32);
+      }
+      pos.y -= 55;
+      look.y -= 72;
+      cam.fov = 36;
+    } else {
+      cam.fov = 40;
+    }
+    cam.updateProjectionMatrix();
     camera.position.copy(pos);
     camera.lookAt(look);
   });

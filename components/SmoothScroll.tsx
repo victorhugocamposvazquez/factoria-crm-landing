@@ -6,18 +6,21 @@ import { gsap } from "@/lib/gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 /**
- * Lenis (inertial scroll) wired into GSAP's ticker so ScrollTrigger
- * and Lenis share one clock. This is what makes scrubbed timelines
- * feel "cinematic" instead of stepping with the wheel.
+ * Light Lenis inertia (optional). ScrollTrigger scrubbed sections work
+ * with native scroll too — Lenis only softens the wheel. On touch we
+ * skip it so mobile feels native.
  */
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (reduced || coarse) return;
 
     const lenis = new Lenis({
-      lerp: 0.085,
-      wheelMultiplier: 0.9,
+      // Higher lerp = closer to native (was 0.085 → felt heavy site-wide).
+      lerp: 0.16,
+      wheelMultiplier: 1.05,
+      touchMultiplier: 1,
       smoothWheel: true,
     });
 
@@ -26,7 +29,6 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
-    // Anchor links go through Lenis so they keep the inertia.
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null;
       if (!a) return;
@@ -35,11 +37,10 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       const el = document.querySelector(id);
       if (!el) return;
       e.preventDefault();
-      lenis.scrollTo(el as HTMLElement, { offset: 0, duration: 1.4 });
+      lenis.scrollTo(el as HTMLElement, { offset: 0, duration: 0.9 });
     };
     document.addEventListener("click", onClick);
 
-    // Re-measure every pin once fonts and images have settled.
     const refresh = () => ScrollTrigger.refresh();
     const t = window.setTimeout(refresh, 300);
     window.addEventListener("load", refresh);
