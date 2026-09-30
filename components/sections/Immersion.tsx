@@ -21,11 +21,11 @@ export default function Immersion() {
     return t * t * (3 - 2 * t);
   };
 
-  // More scroll distance so 24fps frames advance gradually instead of jumping.
-  const progress = usePinnedProgress(pinRef, 7, (p) => {
+  const progress = usePinnedProgress(pinRef, 5.5, (p) => {
     const el = pinRef.current;
     if (!el) return;
-    el.style.setProperty("--bar", p > 0.015 && p < 0.985 ? "7vh" : "0px");
+    // Soft letterbox only mid-sequence; keep edges open to blend with navy.
+    el.style.setProperty("--bar", p > 0.04 && p < 0.96 ? "4vh" : "0px");
     const next = p < 0.28 ? 0 : p < 0.55 ? 1 : p < 0.82 ? 2 : 3;
     setPhase((cur) => (cur === next ? cur : next));
     if (capRef.current) capRef.current.style.opacity = String(p > 0.02 ? 1 : 0);
@@ -41,26 +41,30 @@ export default function Immersion() {
   });
 
   return (
-    <section id="inmersion" aria-label="Nos inundamos de tu proyecto">
-      <div ref={pinRef} className="letterbox relative h-screen w-full overflow-hidden bg-deep">
+    <section id="inmersion" aria-label="Nos inundamos de tu proyecto" className="bg-navy">
+      <div ref={pinRef} className="letterbox relative h-screen w-full overflow-hidden bg-navy">
         <div className="absolute inset-0">
           <FrameSequence progress={progress} className="h-full w-full" />
 
-          {/* Exterior circular matte: dark navy vignette framing the shot */}
+          {/* Soft edge frame only — blends into page navy, no deep circular hole */}
           <div
             className="pointer-events-none absolute inset-0 z-[1]"
             style={{
-              background:
-                "radial-gradient(ellipse 58% 62% at 50% 46%, transparent 0%, transparent 42%, rgba(11,13,36,.28) 58%, rgba(11,13,36,.72) 74%, #0b0d24 88%, #05061a 100%)",
+              background: [
+                "linear-gradient(to bottom, #111435 0%, rgba(17,20,53,.55) 4%, transparent 14%)",
+                "linear-gradient(to top, #111435 0%, rgba(17,20,53,.65) 6%, transparent 18%)",
+                "linear-gradient(to right, #111435 0%, rgba(17,20,53,.35) 3%, transparent 9%)",
+                "linear-gradient(to left, #111435 0%, rgba(17,20,53,.35) 3%, transparent 9%)",
+              ].join(", "),
             }}
           />
 
-          {/* Soft readability veil for type */}
+          {/* Light type veil */}
           <div
             className="pointer-events-none absolute inset-0 z-[2]"
             style={{
               background:
-                "linear-gradient(180deg, rgba(11,13,36,.5) 0%, rgba(11,13,36,.08) 26%, rgba(11,13,36,.05) 58%, rgba(11,13,36,.78) 100%)",
+                "linear-gradient(180deg, rgba(17,20,53,.35) 0%, transparent 22%, transparent 62%, rgba(17,20,53,.55) 100%)",
             }}
           />
         </div>
@@ -70,7 +74,7 @@ export default function Immersion() {
             <div className="mono">Nuestro método</div>
             <h2
               className="disp mt-4 text-[11vw] font-bold leading-[0.96] text-ink md:text-[7.5vw]"
-              style={{ textShadow: "0 8px 60px rgba(5,6,26,.9), 0 2px 12px rgba(5,6,26,.8)" }}
+              style={{ textShadow: "0 8px 60px rgba(17,20,53,.9), 0 2px 12px rgba(17,20,53,.8)" }}
             >
               Nos inundamos
               <br />
@@ -91,7 +95,7 @@ export default function Immersion() {
               style={{
                 opacity: phase === i ? 1 : 0,
                 transform: `translateY(${phase === i ? 0 : 12}px)`,
-                textShadow: "0 4px 30px rgba(5,6,26,.95), 0 1px 8px rgba(5,6,26,.9)",
+                textShadow: "0 4px 30px rgba(17,20,53,.95), 0 1px 8px rgba(17,20,53,.9)",
               }}
             >
               {c}

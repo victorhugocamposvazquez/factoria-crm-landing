@@ -29,11 +29,17 @@ export default function Manifesto() {
   );
 
   return (
-    <section ref={root} className="relative py-40 md:py-56">
+    <section ref={root} className="relative bg-navy py-40 md:py-56">
+      {/* Soft handoff into immersion — no hard cut */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
+        style={{ background: "linear-gradient(to bottom, transparent, #111435)" }}
+        aria-hidden
+      />
       <div className="mono absolute left-6 top-8 md:left-10">
         <div className="wrap !px-0" />
       </div>
-      <div className="wrap grid gap-10 md:grid-cols-[220px_1fr]">
+      <div className="wrap relative grid gap-10 md:grid-cols-[220px_1fr]">
         <div className="mono eyebrow hidden self-start md:sticky md:top-32 md:inline-flex">Manifiesto</div>
         <p className="disp max-w-[980px] text-[30px] leading-[1.18] font-normal md:text-[52px]">
           {TEXT.map(([sentence, k]) =>

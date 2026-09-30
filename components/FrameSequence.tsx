@@ -5,7 +5,6 @@ import {
   IMMERSION_FRAME_COUNT,
   IMMERSION_FRAME_HEIGHT,
   IMMERSION_FRAME_WIDTH,
-  immersionFrameIndex,
   immersionFrameSrc,
 } from "@/lib/immersionFrames";
 import { damp } from "@/lib/scrollProgress";
@@ -15,17 +14,28 @@ type Props = {
   className?: string;
 };
 
+function frameAt(frames: (HTMLImageElement | null)[], index: number) {
+  const i = Math.min(IMMERSION_FRAME_COUNT, Math.max(1, index));
+  let img = frames[i];
+  if (img) return img;
+  for (let d = 1; d < IMMERSION_FRAME_COUNT; d++) {
+    img = frames[i - d] || frames[i + d];
+    if (img) return img;
+  }
+  return null;
+}
+
 /**
- * Scroll-scrubbed WebP sequence. Progress is damped so wheel steps
- * never show as hard frame jumps.
+ * Scroll-scrubbed WebP sequence with fractional crossfade between
+ * neighboring frames so the motion stays fluid instead of stepping.
  */
 export default function FrameSequence({ progress, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const framesRef = useRef<(HTMLImageElement | null)[]>([]);
-  const drawnRef = useRef(-1);
   const readyRef = useRef(false);
   const smoothP = useRef(0);
   const lastTs = useRef(0);
+  const lastDrawn = useRef(-1);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,17 +58,12 @@ export default function FrameSequence({ progress, className }: Props) {
       await load(1);
       if (cancelled) return;
       readyRef.current = true;
-      draw(1);
+      paint(0);
 
-      // Preferential load: mid + end first (visible soon), then fill gaps.
       const order: number[] = [];
       for (let i = 2; i <= IMMERSION_FRAME_COUNT; i++) order.push(i);
-      order.sort((a, b) => {
-        const da = Math.min(a - 1, IMMERSION_FRAME_COUNT - a);
-        const db = Math.min(b - 1, IMMERSION_FRAME_COUNT - b);
-        return da - db;
-      });
-      const concurrency = 8;
+      // Sequential order: scrub starts at the beginning, so load forward first.
+      const concurrency = 10;
       for (let i = 0; i < order.length; i += concurrency) {
         if (cancelled) return;
         await Promise.all(order.slice(i, i + concurrency).map(load));
@@ -76,11 +81,11 @@ export default function FrameSequence({ progress, className }: Props) {
     const tick = (ts: number) => {
       const prev = lastTs.current || ts;
       lastTs.current = ts;
-      const dt = Math.min(0.05, (ts - prev) / 1000);
+      const dt = Math.min(0.048, (ts - prev) / 1000);
       if (readyRef.current) {
-        smoothP.current = damp(smoothP.current, progress.current, 10, dt);
-        const idx = immersionFrameIndex(smoothP.current);
-        if (idx !== drawnRef.current) draw(idx);
+        // Light damp: follows the scrub closely without sticky lag.
+        smoothP.current = damp(smoothP.current, progress.current, 18, dt);
+        paint(smoothP.current);
       }
       raf = requestAnimationFrame(tick);
     };
@@ -89,19 +94,24 @@ export default function FrameSequence({ progress, className }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress]);
 
-  function draw(index: number) {
+  function paint(p: number) {
     const canvas = canvasRef.current;
-    // Prefer exact frame; fall back to nearest loaded neighbour so scrub never blanks.
-    let img = framesRef.current[index];
-    if (!img) {
-      for (let d = 1; d < IMMERSION_FRAME_COUNT; d++) {
-        img = framesRef.current[index - d] || framesRef.current[index + d];
-        if (img) break;
-      }
-    }
-    if (!canvas || !img) return;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
+
+    const t = Math.min(1, Math.max(0, p));
+    const f = 1 + t * (IMMERSION_FRAME_COUNT - 1);
+    // Skip microscopic redraws
+    if (Math.abs(f - lastDrawn.current) < 0.01) return;
+    lastDrawn.current = f;
+
+    const i0 = Math.floor(f);
+    const i1 = Math.min(IMMERSION_FRAME_COUNT, i0 + 1);
+    const mix = f - i0;
+    const a = frameAt(framesRef.current, i0);
+    const b = mix > 0.001 ? frameAt(framesRef.current, i1) : null;
+    if (!a) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = canvas.clientWidth;
@@ -119,10 +129,16 @@ export default function FrameSequence({ progress, className }: Props) {
     const dh = IMMERSION_FRAME_HEIGHT * scale;
     const dx = (w - dw) / 2;
     const dy = (h - dh) / 2;
-    ctx.fillStyle = "#0b0d24";
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#111435";
     ctx.fillRect(0, 0, w, h);
-    ctx.drawImage(img, dx, dy, dw, dh);
-    drawnRef.current = index;
+    ctx.drawImage(a, dx, dy, dw, dh);
+    if (b && mix > 0) {
+      ctx.globalAlpha = mix;
+      ctx.drawImage(b, dx, dy, dw, dh);
+      ctx.globalAlpha = 1;
+    }
   }
 
   return (

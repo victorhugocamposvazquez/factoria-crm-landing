@@ -24,7 +24,7 @@ export function usePinnedProgress(
       end: () => `+=${distance * window.innerHeight}`,
       pin: true,
       pinSpacing: true,
-      scrub: 1.1,
+      scrub: 0.45,
       anticipatePin: 1,
       onUpdate: (self) => {
         progress.current = self.progress;
