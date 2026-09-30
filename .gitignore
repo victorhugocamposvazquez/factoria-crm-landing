@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env*
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+# fuente del scrub; en public/immersion van los WebP ligeros
+*.mp4
+kling_*.mp4

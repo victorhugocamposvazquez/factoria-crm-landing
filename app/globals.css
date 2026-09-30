@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #111435;
+  --color-deep: #0b0d24;
+  --color-surface: #171b45;
+  --color-ink: #f2f3ff;
+  --color-muted: #a2a6c8;
+  --color-blue: #3449ff;
+  --color-lime: #c1ff28;
+
+  --font-display: var(--font-roboto);
+  --font-body: var(--font-roboto);
+  --font-mono: var(--font-roboto-mono);
+}
+
+html {
+  background: #111435;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  @apply bg-navy text-ink font-body antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: #c1ff28;
+  color: #0b0d24;
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-[1280px] px-6 md:px-10;
+  }
+  .disp {
+    @apply font-display tracking-[-0.03em] leading-[1.02] font-medium;
+  }
+  .disp-light {
+    @apply font-light;
+  }
+  .disp-black {
+    @apply font-black;
+  }
+  .mono {
+    @apply font-mono text-[12px] uppercase tracking-[0.14em] text-muted;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply block h-px w-7 bg-white/40;
+  }
+  .btn {
+    @apply inline-flex h-[52px] items-center gap-2.5 rounded-full border border-transparent px-[26px] font-display text-[16px] font-semibold whitespace-nowrap transition-[transform,background-color,color,border-color] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] hover:-translate-y-0.5;
+  }
+  .btn-lime {
+    @apply bg-lime text-deep hover:bg-[#daff6e];
+  }
+  .btn-white {
+    @apply bg-ink text-deep hover:bg-white;
+  }
+  .btn-ghost {
+    @apply border-white/20 text-ink hover:border-white;
+  }
+  .card {
+    @apply relative overflow-hidden rounded-[20px] border border-white/10 bg-surface p-7 transition-[border-color,transform] duration-400 hover:-translate-y-1 hover:border-white/30;
+  }
+  .kcol {
+    @apply flex flex-col gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.03] p-3;
+  }
+  .kcard {
+    @apply flex flex-col gap-1.5 rounded-[10px] border border-white/10 bg-[#1d2252] px-3.5 py-3;
+  }
+  .kcard b {
+    @apply text-[13px] font-semibold;
+  }
+  .kcard small {
+    @apply text-[11px] text-muted;
+  }
+  .pill {
+    @apply self-start rounded-full bg-lime/15 px-2 py-[3px] text-[10px] font-semibold tracking-[0.04em] text-lime;
+  }
+  .pill-b {
+    @apply bg-blue/25 text-[#b8c0ff];
+  }
+}
+
+/* Letterbox bars used by the immersion sequence */
+.letterbox::before,
+.letterbox::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--bar, 0px);
+  background: #05061a;
+  z-index: 20;
+  pointer-events: none;
+  transition: height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.letterbox::before {
+  top: 0;
+}
+.letterbox::after {
+  bottom: 0;
+}
+
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details[open] .plus {
+  transform: rotate(45deg);
+  background: #f2f3ff;
+  color: #0b0d24;
+  border-color: #f2f3ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.fld {
+  @apply h-14 w-full rounded-[14px] border border-white/15 bg-white/[0.04] px-[18px] text-[16px] text-white outline-none placeholder:text-[#7c81a8] focus:border-lime;
+}
+
+@keyframes marq {
+  to {
+    transform: translateX(-50%);
+  }
+}
