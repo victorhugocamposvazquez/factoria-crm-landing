@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
-import SiliconJourney from "@/components/scenes/SiliconJourney";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -33,7 +32,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${roboto.variable} ${robotoMono.variable}`}>
       <body>
-        <SiliconJourney />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

@@ -33,8 +33,7 @@ html.lenis body {
 }
 
 body {
-  @apply text-ink font-body antialiased;
-  background: transparent;
+  @apply bg-navy text-ink font-body antialiased;
   overflow-x: hidden;
 }
 
