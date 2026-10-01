@@ -12,7 +12,7 @@ const ROWS = [
 
 export default function Compare() {
   return (
-    <Reveal id="comparativa" className="border-y border-white/[0.07] bg-deep py-28 md:py-32">
+    <Reveal id="comparativa" className="border-y border-white/[0.07] bg-deep/40 py-28 backdrop-blur-[2px] md:py-32">
       <div className="wrap grid items-start gap-12 md:grid-cols-[380px_1fr] md:gap-16">
         <div data-rv className="flex flex-col gap-5 md:sticky md:top-32">
           <div className="mono eyebrow text-muted">A medida vs. genérico</div>

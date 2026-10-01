@@ -29,11 +29,11 @@ export default function Manifesto() {
   );
 
   return (
-    <section ref={root} className="relative bg-navy py-40 md:py-56">
+    <section ref={root} className="relative bg-transparent py-40 md:py-56">
       {/* Soft handoff into immersion — no hard cut */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
-        style={{ background: "linear-gradient(to bottom, transparent, #111435)" }}
+        style={{ background: "linear-gradient(to bottom, transparent, rgba(17,20,53,.55))" }}
         aria-hidden
       />
       <div className="mono absolute left-6 top-8 md:left-10">

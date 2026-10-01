@@ -47,7 +47,7 @@ export default function Process() {
   );
 
   return (
-    <section id="proceso" ref={root} className="relative bg-[linear-gradient(180deg,#111435,#0b0d24_20%,#0b0d24_80%,#111435)]">
+    <section id="proceso" ref={root} className="relative bg-[linear-gradient(180deg,transparent,rgba(11,13,36,.55)_18%,rgba(11,13,36,.7)_80%,transparent)]">
       <div ref={pin} className="flex h-screen items-center overflow-hidden">
         <div className="wrap grid w-full items-center gap-16 md:grid-cols-2">
           <div className="flex flex-col gap-10">

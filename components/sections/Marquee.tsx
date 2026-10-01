@@ -3,7 +3,7 @@ const ITEMS = ["Pipeline propio", "Datos en tu Supabase", "Automatizaciones", "M
 export default function Marquee() {
   const row = [...ITEMS, ...ITEMS];
   return (
-    <div className="overflow-hidden border-y border-white/[0.09] bg-deep py-4" aria-hidden="true">
+    <div className="overflow-hidden border-y border-white/[0.09] bg-deep/35 py-4 backdrop-blur-[2px]" aria-hidden="true">
       <div className="flex w-max gap-16 whitespace-nowrap motion-safe:animate-[marq_28s_linear_infinite]">
         {row.map((t, i) => (
           <span key={i} className="inline-flex items-center gap-16 font-display text-[14px] uppercase tracking-[0.2em] text-muted">
