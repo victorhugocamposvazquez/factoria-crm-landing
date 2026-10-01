@@ -32,26 +32,35 @@ const vert = /* glsl */ `
   }
 
   void main() {
-    // Lazy alive spin before / during scroll
+    // 1. Giro perezoso base
     float t = uTime;
     vec3 p = rotX(t * 0.11) * rotY(t * 0.17) * position;
 
-    // Exponential radial blast as the camera dives in (portal / data tunnel)
-    float blast = pow(uProgress, 1.55);
-    float radial = 1.0 + blast * (2.6 + aSeed * 1.8);
+    // 2. Progreso con curva de aceleración agresiva (estilo Apple)
+    float blast = pow(uProgress, 2.2);
+
+    // 3. Dispersión radial masiva (abre la esfera como un embudo)
+    float radial = 1.0 + blast * (6.5 + aSeed * 4.0);
     p.x *= radial;
     p.y *= radial;
-    p.z *= 1.0 + blast * 0.55;
 
-    // Soft depth push so particles stream past the camera
-    p.z -= blast * aSeed * 1.4;
+    // 4. Empuje en profundidad (Z) crítico para rebasar la cámara
+    p.z -= blast * (12.0 + aSeed * 8.0);
 
+    // 5. Tamaño del punto con atenuación; oculta si ya rebasó la cámara
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     float size = (1.35 + aSeed * 1.55) * (280.0 / max(0.001, -mv.z));
-    gl_PointSize = clamp(size, 0.6, 4.5);
+    if (mv.z >= 0.0) {
+      gl_PointSize = 0.0;
+    } else {
+      gl_PointSize = clamp(size, 0.6, 5.0);
+    }
+
     gl_Position = projectionMatrix * mv;
 
-    vAlpha = mix(0.7, 0.12, blast) * (0.35 + aSeed * 0.65);
+    // 6. Desvanecimiento progresivo en el 10% final del scroll
+    float fadeOut = smoothstep(0.9, 1.0, uProgress);
+    vAlpha = mix(0.7, 0.0, fadeOut) * (0.35 + aSeed * 0.65);
   }
 `;
 
@@ -114,7 +123,7 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
       alpha: false,
       powerPreference: "high-performance",
     });
-    renderer.setClearColor(0x000000, 1);
+    renderer.setClearColor(0x111336, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
@@ -122,11 +131,11 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.045);
+    scene.fog = new THREE.FogExp2(0x111336, 0.045);
 
     const camera = new THREE.PerspectiveCamera(48, 1, 0.05, 80);
     const camStartZ = 7.2;
-    const camEndZ = 0.55;
+    const camEndZ = -3.5;
     camera.position.set(0, 0.15, camStartZ);
 
     // --- Geometry / material ----------------------------------------------
@@ -211,7 +220,8 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
       pointer.y += (pointerTarget.y - pointer.y) * 0.04;
       camera.position.x = pointer.x * 0.35 * (1 - prog * 0.7);
       camera.position.y = 0.15 - pointer.y * 0.22 * (1 - prog * 0.7);
-      camera.lookAt(0, 0, 0);
+      // Always look forward along -Z so the dive continues past the origin
+      camera.lookAt(camera.position.x, camera.position.y, camera.position.z - 1);
 
       // Keep a faint spin even with reduced motion (no scrub)
       if (reduced) {
@@ -242,7 +252,7 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
       ref={hostRef}
       className={className}
       aria-hidden
-      style={{ position: "absolute", inset: 0, background: "#000000" }}
+      style={{ position: "absolute", inset: 0, background: "#111336" }}
     />
   );
 }

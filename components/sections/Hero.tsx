@@ -33,7 +33,7 @@ export default function Hero() {
   );
 
   return (
-    <section id="top" ref={root} className="relative h-[180vh] bg-black">
+    <section id="top" ref={root} className="relative h-[180vh]" style={{ background: "#111336" }}>
       {/* Sticky full-viewport canvas — scroll advances the dive through the sphere */}
       <div className="sticky top-0 h-[100svh] min-h-[640px] max-h-[980px] overflow-hidden">
         <div className="absolute inset-0">
@@ -47,7 +47,7 @@ export default function Hero() {
           className="hero-veil pointer-events-none absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(ellipse 70% 55% at 50% 42%, transparent 0%, rgba(0,0,0,.25) 70%, rgba(0,0,0,.65) 100%), linear-gradient(180deg, rgba(0,0,0,.2) 0%, transparent 30%, rgba(17,20,53,.55) 78%, #111435 100%)",
+              "radial-gradient(ellipse 70% 55% at 50% 42%, transparent 0%, rgba(17,19,54,.25) 70%, rgba(17,19,54,.65) 100%), linear-gradient(180deg, rgba(17,19,54,.2) 0%, transparent 30%, rgba(17,20,53,.55) 78%, #111435 100%)",
           }}
         />
 
