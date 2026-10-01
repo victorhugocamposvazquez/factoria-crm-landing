@@ -55,10 +55,10 @@ export default function Hero() {
           <div className="pointer-events-auto grid w-full items-end gap-12 md:grid-cols-[1.5fr_.7fr]">
             <div className="flex flex-col gap-6">
               <div className="mono eyebrow hero-fade text-muted">Software de mejora empresarial</div>
-              <h1 className="disp text-[44px] leading-[1.02] sm:text-[64px] lg:text-[80px]">
+              <h1 className="disp text-[44px] leading-[1.02] font-light sm:text-[64px] lg:text-[80px]">
                 <span className="hero-line block overflow-hidden">
-                  <span className="block">
-                    El CRM que se <span className="font-light text-[#c9cce8]">adapta a ti</span>
+                  <span className="block text-[#c9cce8]">
+                    El CRM que se adapta a <span className="font-bold text-ink">tu proyecto</span>
                   </span>
                 </span>
               </h1>

@@ -17,11 +17,11 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "factoríacrm · El CRM que se adapta a ti",
+  title: "factoríacrm · El CRM que se adapta a tu proyecto",
   description:
     "Una herramienta hecha para tu empresa: organiza clientes, equipos y procesos y automatiza tu día a día.",
   openGraph: {
-    title: "factoríacrm · El CRM que se adapta a ti",
+    title: "factoríacrm · El CRM que se adapta a tu proyecto",
     description: "Software de mejora empresarial. El código y los datos son tuyos.",
     locale: "es_ES",
     type: "website",
