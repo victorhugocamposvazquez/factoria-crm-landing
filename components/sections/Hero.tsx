@@ -54,14 +54,16 @@ export default function Hero() {
         <div className="hero-content wrap pointer-events-none relative z-[2] flex h-full items-end pb-16 pt-24 md:items-center md:pb-0">
           <div className="pointer-events-auto grid w-full items-end gap-12 md:grid-cols-[1.5fr_.7fr]">
             <div className="flex flex-col gap-6">
-              <div className="mono eyebrow hero-fade text-muted">CRM a medida · Next.js · Supabase · Vercel</div>
+              <div className="mono eyebrow hero-fade text-muted">Software de mejora empresarial</div>
               <h1 className="disp text-[44px] leading-[1.02] sm:text-[64px] lg:text-[80px]">
-                <span className="hero-line block overflow-hidden"><span className="block">Tu CRM no debería</span></span>
-                <span className="hero-line block overflow-hidden"><span className="block">obligarte a cambiar</span></span>
-                <span className="hero-line block overflow-hidden"><span className="block font-light text-[#c9cce8]">cómo vendes.</span></span>
+                <span className="hero-line block overflow-hidden">
+                  <span className="block">
+                    El CRM que se <span className="font-light text-[#c9cce8]">adapta a ti</span>
+                  </span>
+                </span>
               </h1>
               <p className="hero-fade max-w-[600px] text-[17px] leading-relaxed text-[#c9cce8] md:text-[18px]">
-                Diseñamos y fabricamos CRMs a medida para equipos comerciales: tu pipeline, tus etapas, tus reglas. Sin licencias por asiento y sin módulos que nunca vas a usar.
+                Una herramienta hecha para tu empresa: organiza clientes, equipos y procesos y automatiza tu día a día.
               </p>
               <div className="hero-fade flex flex-wrap gap-3.5">
                 <a href="#contacto" className="btn btn-lime">

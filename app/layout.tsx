@@ -17,12 +17,12 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "factoríacrm · Tu CRM, tus reglas.",
+  title: "factoríacrm · El CRM que se adapta a ti",
   description:
-    "Diseñamos y fabricamos CRMs a medida para equipos comerciales: tu pipeline, tus etapas, tus reglas. Sin licencias por asiento.",
+    "Una herramienta hecha para tu empresa: organiza clientes, equipos y procesos y automatiza tu día a día.",
   openGraph: {
-    title: "factoríacrm · Tu CRM, tus reglas.",
-    description: "CRM a medida sobre Next.js, Supabase y Vercel. El código y los datos son tuyos.",
+    title: "factoríacrm · El CRM que se adapta a ti",
+    description: "Software de mejora empresarial. El código y los datos son tuyos.",
     locale: "es_ES",
     type: "website",
   },
