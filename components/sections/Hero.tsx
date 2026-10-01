@@ -70,9 +70,6 @@ export default function Hero() {
                   <path d="m13 6 6 6-6 6" />
                 </svg>
               </a>
-              <a href="#inmersion" className="btn btn-ghost">
-                Ver cómo trabajamos
-              </a>
             </div>
           </div>
         </div>
