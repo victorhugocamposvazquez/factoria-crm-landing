@@ -49,18 +49,18 @@ const vert = /* glsl */ `
 
     // 5. Tamaño del punto con atenuación; oculta si ya rebasó la cámara
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    float size = (1.35 + aSeed * 1.55) * (280.0 / max(0.001, -mv.z));
+    float size = (1.6 + aSeed * 1.8 + uProgress * 1.4) * (300.0 / max(0.001, -mv.z));
     if (mv.z >= 0.0) {
       gl_PointSize = 0.0;
     } else {
-      gl_PointSize = clamp(size, 0.6, 5.0);
+      gl_PointSize = clamp(size, 0.8, 7.0);
     }
 
     gl_Position = projectionMatrix * mv;
 
-    // 6. Desvanecimiento progresivo en el 10% final del scroll
-    float fadeOut = smoothstep(0.9, 1.0, uProgress);
-    vAlpha = mix(0.7, 0.0, fadeOut) * (0.35 + aSeed * 0.65);
+    // 6. Más visibles al acercarse (suben alpha), sin difuminarse
+    float grow = smoothstep(0.0, 0.75, uProgress);
+    vAlpha = mix(0.45, 1.0, grow) * (0.5 + aSeed * 0.5);
   }
 `;
 
@@ -77,7 +77,7 @@ const frag = /* glsl */ `
     float halo = smoothstep(0.5, 0.0, d) * 0.35;
     float a = (core + halo) * vAlpha;
     // Soft cyber-blue / white-blue
-    vec3 col = mix(vec3(0.55, 0.68, 1.0), vec3(0.88, 0.93, 1.0), core);
+    vec3 col = mix(vec3(0.62, 0.74, 1.0), vec3(0.95, 0.97, 1.0), core);
     gl_FragColor = vec4(col, a);
   }
 `;
@@ -131,7 +131,7 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x111336, 0.045);
+    scene.fog = new THREE.FogExp2(0x111336, 0.018);
 
     const camera = new THREE.PerspectiveCamera(48, 1, 0.05, 80);
     const camStartZ = 7.2;
@@ -213,6 +213,10 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
       material.uniforms.uProgress.value += (p - material.uniforms.uProgress.value) * 0.12;
 
       const prog = material.uniforms.uProgress.value;
+      // Less fog as we dive in — particles stay crisp and bright
+      if (scene.fog instanceof THREE.FogExp2) {
+        scene.fog.density = THREE.MathUtils.lerp(0.018, 0.004, prog);
+      }
       // Dive straight into the sphere along Z
       camera.position.z = THREE.MathUtils.lerp(camStartZ, camEndZ, prog);
       // Micro parallax from pointer
