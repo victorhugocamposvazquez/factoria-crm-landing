@@ -35,7 +35,7 @@ export default function Cta() {
       <footer className="border-t border-white/[0.08] bg-deep py-10">
         <div className="wrap flex flex-wrap items-center justify-between gap-6">
           <Image src="/logo.png" alt="factoríacrm" width={599} height={101} className="h-8 w-auto" />
-          <div className="mono">© 2026 factoríacrm · un producto de Latency · A Coruña</div>
+          <div className="mono">© 2026 factoríacrm</div>
           <div className="flex gap-6 text-[14px] text-muted">
             <a href="#">Privacidad</a>
             <a href="#">Aviso legal</a>
