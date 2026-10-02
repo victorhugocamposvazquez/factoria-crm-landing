@@ -159,6 +159,85 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
     const points = new THREE.Points(geometry, material);
     scene.add(points);
 
+    // --- Logo rings: orbit → converge into brand mark -------------------
+    // Blue (base) · lime (top-right) · white (bottom-right) — as in logo.png
+    type Ring = {
+      mesh: THREE.Mesh;
+      orbitR: number;
+      speed: number;
+      phase: number;
+      tilt: number;
+      logoLocal: THREE.Vector3;
+      logoScale: number;
+      orbitScale: number;
+    };
+
+    const ringGeo = new THREE.CircleGeometry(1, 64);
+    const makeRingMat = (color: number, opacity: number) =>
+      new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        blending: THREE.NormalBlending,
+      });
+
+    const ringsGroup = new THREE.Group();
+    scene.add(ringsGroup);
+
+    const rings: Ring[] = [
+      {
+        mesh: new THREE.Mesh(ringGeo, makeRingMat(0x3449ff, 0.92)),
+        orbitR: 2.85,
+        speed: 0.22,
+        phase: 0.0,
+        tilt: 0.35,
+        logoLocal: new THREE.Vector3(0, 0, 0),
+        logoScale: 0.72,
+        orbitScale: 0.55,
+      },
+      {
+        mesh: new THREE.Mesh(ringGeo, makeRingMat(0xc1ff28, 0.95)),
+        orbitR: 3.15,
+        speed: -0.28,
+        phase: 2.1,
+        tilt: -0.45,
+        logoLocal: new THREE.Vector3(0.38, 0.42, 0.04),
+        logoScale: 0.34,
+        orbitScale: 0.32,
+      },
+      {
+        mesh: new THREE.Mesh(ringGeo, makeRingMat(0xf2f3ff, 0.88)),
+        orbitR: 3.45,
+        speed: 0.35,
+        phase: 4.2,
+        tilt: 0.55,
+        logoLocal: new THREE.Vector3(0.44, -0.36, 0.06),
+        logoScale: 0.26,
+        orbitScale: 0.24,
+      },
+    ];
+
+    const orbitPos = new THREE.Vector3();
+    const logoPos = new THREE.Vector3();
+    rings.forEach((r) => {
+      r.mesh.scale.setScalar(r.orbitScale);
+      ringsGroup.add(r.mesh);
+    });
+
+    // Soft glow discs behind each ring (same tint, larger, lower alpha)
+    const glows = rings.map((r) => {
+      const mat = r.mesh.material as THREE.MeshBasicMaterial;
+      const glow = new THREE.Mesh(
+        ringGeo,
+        makeRingMat(mat.color.getHex(), 0.18),
+      );
+      glow.scale.setScalar(r.orbitScale * 1.55);
+      ringsGroup.add(glow);
+      return glow;
+    });
+
     // Subtle interactive tilt (pointer)
     const pointer = { x: 0, y: 0 };
     const pointerTarget = { x: 0, y: 0 };
@@ -227,6 +306,39 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
       // Always look forward along -Z so the dive continues past the origin
       camera.lookAt(camera.position.x, camera.position.y, camera.position.z - 1);
 
+      // Logo rings: orbit while idle → assemble mark on scroll → fade with dive
+      const assemble = THREE.MathUtils.smoothstep(prog, 0.0, 0.42);
+      const dissolve = THREE.MathUtils.smoothstep(prog, 0.55, 0.92);
+      const ringAlpha = 1 - dissolve;
+
+      rings.forEach((r, i) => {
+        const ang = t * r.speed + r.phase;
+        orbitPos.set(
+          Math.cos(ang) * r.orbitR,
+          Math.sin(ang * 0.85 + r.tilt) * r.orbitR * 0.72,
+          Math.sin(ang) * r.orbitR * 0.55,
+        );
+        logoPos.copy(r.logoLocal);
+        // Slight forward offset so the mark sits in front of the particle shell
+        logoPos.z += 0.15;
+
+        r.mesh.position.lerpVectors(orbitPos, logoPos, assemble);
+        const sc = THREE.MathUtils.lerp(r.orbitScale, r.logoScale, assemble);
+        r.mesh.scale.setScalar(sc);
+
+        // Face camera (billboard) so they read as the flat logo discs
+        r.mesh.quaternion.copy(camera.quaternion);
+
+        const mat = r.mesh.material as THREE.MeshBasicMaterial;
+        mat.opacity = (i === 0 ? 0.92 : i === 1 ? 0.95 : 0.88) * ringAlpha;
+
+        const glow = glows[i];
+        glow.position.copy(r.mesh.position);
+        glow.quaternion.copy(camera.quaternion);
+        glow.scale.setScalar(sc * 1.55);
+        (glow.material as THREE.MeshBasicMaterial).opacity = 0.16 * ringAlpha;
+      });
+
       // Keep a faint spin even with reduced motion (no scrub)
       if (reduced) {
         material.uniforms.uTime.value = t * 0.35;
@@ -246,6 +358,9 @@ export default function ParticleSphere({ triggerRef, className }: Props) {
       window.removeEventListener("pointermove", onPointer);
       geometry.dispose();
       material.dispose();
+      ringGeo.dispose();
+      rings.forEach((r) => (r.mesh.material as THREE.Material).dispose());
+      glows.forEach((g) => (g.material as THREE.Material).dispose());
       renderer.dispose();
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
